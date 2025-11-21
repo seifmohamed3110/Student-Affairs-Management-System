@@ -1,0 +1,44 @@
+name: daliaa
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  dashed_border: ^1.0.2
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  image_picker: ^1.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/sadat logo firstscreen.png
+    - assets/sadat logo login.png
+    - assets/search icon.png
+    - assets/document.png
+    - assets/studying-exam.png
+    - assets/Home icon.png
+    - assets/Request icon.png
+    - assets/Chat icon.png
+    - assets/Profile icon.png
+    - assets/Accept.png
+    - assets/edit profile.png
+    - assets/change password.png
+    - assets/log out.png
+    - assets/language.png
+    - assets/pic.png
+
+
+
+
