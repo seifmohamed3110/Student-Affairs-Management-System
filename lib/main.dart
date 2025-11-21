@@ -11,7 +11,7 @@ import 'package:daliaa/screens/to_whom_it_may_concern.dart';
 import 'package:daliaa/screens/transcript.dart';
 import 'package:flutter/material.dart';
 import 'screens/first_screen.dart';
-import 'screens/login_screen.dart'; // Import the LoginScreen
+import 'screens/login_screen.dart'; // Import the LoginScreen d
 
 void main() {
   runApp(const MyApp());
