@@ -164,7 +164,7 @@ class _FirstScreenState extends State<FirstScreen> {
                                       width: screenWidth * 0.15,
                                       height: screenWidth * 0.15,
                                       child: Image.network(
-                                        "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/1XcoFvoxgF/bdkv72am_expires_30_days.png",
+                                        "assets/right-arrow.png",
                                         fit: BoxFit.contain,
                                       ),
                                     ),
