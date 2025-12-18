@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api_service.dart';
+import '../app_state.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,85 +43,44 @@ class LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _handleLogin() async {
-    // Validate inputs
+  void _handleLogin() async {
     if (studentCode.isEmpty || password.isEmpty) {
-      if (!mounted) return;
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Validation Error'),
-          content: const Text('Please fill in all fields'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            )
-          ],
-        ),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter all fields')),
       );
       return;
     }
 
+    // Start loading spinner
     setState(() {
       _isLoading = true;
     });
 
-    // Save credentials if "Remember Me" is checked
-    _saveCredentials();
-
     try {
-      // Call actual API service
-      final result = await ApiService.login(studentCode, password);
+      final response = await ApiService.login(studentCode, password);
 
-      if (!mounted) return;
+      if (!mounted) return; // Check if the widget is still in the tree
 
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (result['success'] == true) {
-        // Navigate to homepage
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, '/home');
-        }
+      if (response['success'] == true) {
+        AppState.currentStudent = response['student'];
+        Navigator.pushReplacementNamed(context, '/home');
       } else {
-        // Show error
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-              title: const Text('Login Failed'),
-              content: Text((result['message'] as String?) ?? 'Unknown error'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('OK'),
-                )
-              ],
-            ),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'] ?? 'Login failed')),
+        );
       }
-    } catch (error) {
+    } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
-
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Network Error'),
-          content: Text('Unable to connect to server: $error'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            )
-          ],
-        ),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot connect to server')),
       );
+    } finally {
+      if (mounted) {
+        // Stop loading spinner
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
