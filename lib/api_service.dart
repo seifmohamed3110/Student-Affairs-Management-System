@@ -2,41 +2,27 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // For Android Emulator, use 10.0.2.2.
-  // If testing on a physical device, replace with your PC's local IP (e.g., 192.168.1.5).
-  static const String baseUrl = 'http://10.0.2.2:3000/api';
+  // ⚠️ Make sure this IP is correct for your network.
+  // Using port 3000 to match your backend/server.js
+  static const String baseUrl = 'http://10.1.1.202:3000/api';
 
-  // Login function
-  static Future<Map<String, dynamic>> login(String studentCode, String password) async {
-    try {
-      final url = Uri.parse('$baseUrl/login');
-      
-      // Added timeout to prevent indefinite hanging
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'studentCode': studentCode, 'password': password}),
-      ).timeout(const Duration(seconds: 10));
+  static Future<Map<String, dynamic>> login(
+      String studentId, String password) async {
+    // Endpoint changed from /auth/login back to /login to match your backend routes
+    final response = await http.post(
+      Uri.parse('$baseUrl/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        // The key is 'studentCode' in your backend, not 'studentId'
+        'studentCode': studentId,
+        'password': password,
+      }),
+    );
 
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body); // success
-      } else {
-        try {
-          return jsonDecode(response.body);
-        } catch (_) {
-          return {'success': false, 'message': 'Server error: ${response.statusCode}'};
-        }
-      }
-    } catch (e) {
-      // Simplify error message for user
-      if (e.toString().contains('SocketException')) {
-        return {'success': false, 'message': 'Cannot connect to server. Check if backend is running.'};
-      }
-      return {'success': false, 'message': 'Connection error: ${e.toString()}'};
-    }
+    return jsonDecode(response.body);
   }
 
-  // Get profile function
+  // Get profile function - Kept for now, might need adjustment
   static Future<Map<String, dynamic>> getProfile(String studentCode) async {
     try {
       final url = Uri.parse('$baseUrl/profile/$studentCode');
