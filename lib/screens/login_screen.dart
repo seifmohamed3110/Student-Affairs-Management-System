@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../api_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,6 +13,7 @@ class LoginScreenState extends State<LoginScreen> {
   String password = '';
   bool rememberMe = false;
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -40,15 +42,86 @@ class LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
+    // Validate inputs
+    if (studentCode.isEmpty || password.isEmpty) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Validation Error'),
+          content: const Text('Please fill in all fields'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            )
+          ],
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
     // Save credentials if "Remember Me" is checked
     _saveCredentials();
 
-    // TODO: Implement login logic
-    print('Login pressed - Student Code: $studentCode, Password: $password');
+    try {
+      // Call actual API service
+      final result = await ApiService.login(studentCode, password);
 
-    // Navigate to homepage
-    Navigator.pushReplacementNamed(context, '/home');
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (result['success'] == true) {
+        // Navigate to homepage
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      } else {
+        // Show error
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: const Text('Login Failed'),
+              content: Text((result['message'] as String?) ?? 'Unknown error'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK'),
+                )
+              ],
+            ),
+          );
+        }
+      }
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Network Error'),
+          content: Text('Unable to connect to server: $error'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            )
+          ],
+        ),
+      );
+    }
   }
 
   void _handleForgotPassword() {
@@ -64,7 +137,7 @@ class LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Container(
         constraints: const BoxConstraints.expand(),
-        color: Color(0xFFFFFFFF),
+        color: const Color(0xFFFFFFFF),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -72,11 +145,11 @@ class LoginScreenState extends State<LoginScreen> {
               child: Container(
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: Color(0xFF000000),
+                    color: const Color(0xFF000000),
                     width: 1,
                   ),
                   borderRadius: BorderRadius.zero,
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     begin: Alignment(-1, -1),
                     end: Alignment(-1, 1),
                     colors: [
@@ -131,7 +204,7 @@ class LoginScreenState extends State<LoginScreen> {
                                 child: Text(
                                   "STUDENT AFFAIRS FCI SAMS",
                                   style: TextStyle(
-                                    color: Color(0xFF001636),
+                                    color: const Color(0xFF001636),
                                     fontSize: screenWidth * 0.04,
                                   ),
                                   textAlign: TextAlign.center,
@@ -147,7 +220,7 @@ class LoginScreenState extends State<LoginScreen> {
                                 child: Text(
                                   "Your academic services made simple",
                                   style: TextStyle(
-                                    color: Color(0xFFFFFFFF),
+                                    color: const Color(0xFFFFFFFF),
                                     fontSize: screenWidth * 0.04,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -162,7 +235,7 @@ class LoginScreenState extends State<LoginScreen> {
                                 child: Text(
                                   "STUDENT CODE",
                                   style: TextStyle(
-                                    color: Color(0xFF001636),
+                                    color: const Color(0xFF001636),
                                     fontSize: screenWidth * 0.040,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -173,7 +246,7 @@ class LoginScreenState extends State<LoginScreen> {
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(12),
-                                    color: Color(0xFF001636),
+                                    color: const Color(0xFF001636),
                                   ),
                                   padding: EdgeInsets.symmetric(
                                     vertical: screenHeight * 0.02,
@@ -183,7 +256,7 @@ class LoginScreenState extends State<LoginScreen> {
                                   width: double.infinity,
                                   child: TextField(
                                     style: TextStyle(
-                                      color: Color(0xFFEFEFEF),
+                                      color: const Color(0xFFEFEFEF),
                                       fontSize: screenWidth * 0.045,
                                     ),
                                     onChanged: (value) {
@@ -194,7 +267,7 @@ class LoginScreenState extends State<LoginScreen> {
                                     decoration: InputDecoration(
                                       hintText: "eg. FCI 00000 ",
                                       hintStyle: TextStyle(
-                                        color: Color(0xFFEFEFEF).withOpacity(0.7),
+                                        color: const Color(0xFFEFEFEF).withOpacity(0.7),
                                       ),
                                       isDense: true,
                                       contentPadding: EdgeInsets.symmetric(vertical: 0),
@@ -211,7 +284,7 @@ class LoginScreenState extends State<LoginScreen> {
                                 child: Text(
                                   "PASSWORD",
                                   style: TextStyle(
-                                    color: Color(0xFF001636),
+                                    color: const Color(0xFF001636),
                                     fontSize: screenWidth * 0.040,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -221,7 +294,7 @@ class LoginScreenState extends State<LoginScreen> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(12),
-                                    color: Color(0xFF001636),
+                                    color: const Color(0xFF001636),
                                   ),
                                   padding: EdgeInsets.symmetric(
                                     vertical: screenHeight * 0.02,
@@ -235,7 +308,7 @@ class LoginScreenState extends State<LoginScreen> {
                                       Expanded(
                                         child: TextField(
                                           style: TextStyle(
-                                            color: Color(0xFFEFEFEF),
+                                            color: const Color(0xFFEFEFEF),
                                             fontSize: screenWidth * 0.045,
                                           ),
                                           onChanged: (value) {
@@ -247,7 +320,7 @@ class LoginScreenState extends State<LoginScreen> {
                                           decoration: InputDecoration(
                                             hintText: "Enter your password",
                                             hintStyle: TextStyle(
-                                              color: Color(0xFFEFEFEF).withOpacity(0.7),
+                                              color: const Color(0xFFEFEFEF).withOpacity(0.7),
                                             ),
                                             isDense: true,
                                             contentPadding: EdgeInsets.symmetric(vertical: 0),
@@ -274,7 +347,7 @@ class LoginScreenState extends State<LoginScreen> {
                                               _obscurePassword
                                                   ? Icons.visibility_off
                                                   : Icons.visibility,
-                                              color: Color(0xFFEFEFEF),
+                                              color: const Color(0xFFEFEFEF),
                                               size: screenWidth * 0.05,
                                             ),
                                           ),
@@ -307,13 +380,13 @@ class LoginScreenState extends State<LoginScreen> {
                                                     decoration: BoxDecoration(
                                                       borderRadius: BorderRadius.circular(4),
                                                       color: rememberMe
-                                                          ? Color(0xFF001636)
-                                                          : Color(0xFFFFFFFF),
+                                                          ? const Color(0xFF001636)
+                                                          : const Color(0xFFFFFFFF),
                                                       border: Border.all(
-                                                        color: Color(0xFF001636),
+                                                        color: const Color(0xFF001636),
                                                         width: 2,
                                                       ),
-                                                      boxShadow: [
+                                                      boxShadow: const [
                                                         BoxShadow(
                                                           color: Color(0x40000000),
                                                           blurRadius: 4,
@@ -327,7 +400,7 @@ class LoginScreenState extends State<LoginScreen> {
                                                     child: rememberMe
                                                         ? Icon(
                                                       Icons.check,
-                                                      color: Color(0xFFFFFFFF),
+                                                      color: const Color(0xFFFFFFFF),
                                                       size: screenWidth * 0.03,
                                                     )
                                                         : null,
@@ -336,7 +409,7 @@ class LoginScreenState extends State<LoginScreen> {
                                                 Text(
                                                   "REMEMBER ME ",
                                                   style: TextStyle(
-                                                    color: Color(0xFFFFFFFF),
+                                                    color: const Color(0xFFFFFFFF),
                                                     fontSize: screenWidth * 0.035,
                                                   ),
                                                 ),
@@ -353,7 +426,7 @@ class LoginScreenState extends State<LoginScreen> {
                                             child: Text(
                                               "FORGET PASSWORD ?",
                                               style: TextStyle(
-                                                color: Color(0xFFFFFFFF),
+                                                color: const Color(0xFFFFFFFF),
                                                 fontSize: screenWidth * 0.032,
                                               ),
                                               textAlign: TextAlign.center,
@@ -366,12 +439,14 @@ class LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                               InkWell(
-                                onTap: _handleLogin,
+                                onTap: _isLoading ? null : _handleLogin,
                                 child: IntrinsicHeight(
                                   child: Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(12),
-                                      color: Color(0xFF001636),
+                                      color: _isLoading
+                                          ? const Color(0xFF666666)
+                                          : const Color(0xFF001636),
                                     ),
                                     padding: EdgeInsets.symmetric(vertical: screenHeight * 0.025),
                                     width: double.infinity,
@@ -384,15 +459,24 @@ class LoginScreenState extends State<LoginScreen> {
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
-                                                    "LOGIN",
-                                                    style: TextStyle(
-                                                      color: Color(0xFFEFEFEF),
-                                                      fontSize: screenWidth * 0.06,
-                                                      fontWeight: FontWeight.bold,
+                                                  if (_isLoading)
+                                                    SizedBox(
+                                                      width: screenWidth * 0.06,
+                                                      height: screenWidth * 0.06,
+                                                      child: const CircularProgressIndicator(
+                                                        color: Color(0xFFFFFFFF),
+                                                      ),
+                                                    )
+                                                  else
+                                                    Text(
+                                                      "LOGIN",
+                                                      style: TextStyle(
+                                                        color: const Color(0xFFEFEFEF),
+                                                        fontSize: screenWidth * 0.06,
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                      textAlign: TextAlign.center,
                                                     ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
                                                 ],
                                               ),
                                             ),
